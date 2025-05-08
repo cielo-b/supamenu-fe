@@ -50,9 +50,23 @@ export interface LoginDTO {
 }
 
 export interface RegisterDTO {
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
-  phone: string;
+  phoneNumber: string;
+}
+
+
+export interface ApiErrorResponse {
+  success: boolean;
+  error?: string;
+  message: string;
+  timestamp?: string;
+  details?: Record<string, string>;
+}
+
+export interface ValidationErrorResponse extends ApiErrorResponse {
+  error: "VALIDATION_ERROR";
+  details: Record<string, string>;
 }

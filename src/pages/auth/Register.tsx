@@ -1,15 +1,26 @@
 import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { registerSchema } from "../../lib/validation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store";
+import { registerThunk } from "../../thunks/user.thunk";
+import {
+  ApiErrorResponse,
+  ValidationErrorResponse,
+} from "../../interfaces/interfaces";
 
 type RegisterData = z.infer<typeof registerSchema>;
 
 const Register = () => {
   const [showPass, setShowPass] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -20,9 +31,38 @@ const Register = () => {
   });
 
   const onsubmit = async (data: RegisterData) => {
-    console.log(data);
-  };
+    setIsLoading(true);
+    try {
+      const result = await dispatch(registerThunk(data));
+      if (registerThunk.fulfilled.match(result)) {
+        toast.success("User registered successfully, login to continue.");
+        navigate("/login");
+      } else if (registerThunk.rejected.match(result)) {
+        // Handle cases where payload might be undefined
+        const payload = result.payload as ApiErrorResponse | undefined;
 
+        if (payload?.error === "VALIDATION_ERROR") {
+          const validationPayload = payload as ValidationErrorResponse;
+          Object.entries(validationPayload.details || {}).forEach(
+            ([field, message]) => {
+              toast.error(`${field}: ${message}`);
+            }
+          );
+        } else {
+          // Handle other errors
+          toast.error(
+            payload?.message ||
+              (result.error as any)?.message ||
+              "An error occurred during registration"
+          );
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message || "An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <>
       <div className="bg-amber-500 min-h-screen w-full flex items-center justify-center">
@@ -99,17 +139,17 @@ const Register = () => {
                   </label>
                   <input
                     type="text"
-                    {...register("phone")}
+                    {...register("phoneNumber")}
                     placeholder="Phone"
                     className={`mt-1 block w-full px-3 py-2 border focus:border-2 focus:shadow-md rounded-md shadow-sm focus:outline-none ${
-                      errors.phone
+                      errors.phoneNumber
                         ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                         : "border-gray-300 focus:ring-amber-500 focus:border-amber-500"
                     }`}
                   />
-                  {errors.phone && (
+                  {errors.phoneNumber && (
                     <p className="mt-1 text-sm text-red-500">
-                      {errors.phone.message}
+                      {errors.phoneNumber.message}
                     </p>
                   )}
                 </div>

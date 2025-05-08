@@ -9,7 +9,9 @@ export const loginThunk = createAsyncThunk(
       const data = await authService.login(dto);
       return data;
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.response.data.message);
+      return thunkAPI.rejectWithValue(
+        error.response?.data || { message: "Login failed" }
+      );
     }
   }
 );

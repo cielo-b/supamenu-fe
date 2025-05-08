@@ -1,16 +1,24 @@
 import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loginSchema } from "../../lib/validation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store";
+import { loginThunk } from "../../thunks/auth.thunk";
+import { ApiErrorResponse } from "../../interfaces/interfaces";
 
 type LoginData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [showPass, setShowPass] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -21,7 +29,37 @@ const Login = () => {
   });
 
   const onsubmit = async (data: LoginData) => {
-    console.log(data);
+    setIsLoading(true);
+    try {
+      const result = await dispatch(loginThunk(data));
+
+      if (loginThunk.fulfilled.match(result)) {
+        toast.success("Logged in successfully!");
+        navigate("/dashboard");
+      } else if (loginThunk.rejected.match(result)) {
+        const payload = result.payload as ApiErrorResponse | string;
+
+        // Handle different error formats
+        if (typeof payload === "string") {
+          toast.error(payload);
+        } else {
+          // Handle validation errors
+          if (payload?.error === "VALIDATION_ERROR" && payload.details) {
+            Object.entries(payload.details).forEach(([field, message]) => {
+              toast.error(`${field}: ${message}`);
+            });
+          } else {
+            // Handle other errors
+            toast.error(payload?.message || "Login failed. Please try again.");
+          }
+        }
+      }
+    } catch (error: any) {
+      // Fallback for unexpected errors
+      toast.error(error.message || "An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -102,7 +140,7 @@ const Login = () => {
                     </p>
                   )}
                   <div
-                    className="absolute inset-y-0 hover:text-amber-300 right-3 flex items-center cursor-pointer text-gray-500"
+                    className="absolute inset-y-0 hover:text-amber-300 mt-6 right-3 flex items-center cursor-pointer text-gray-500"
                     onClick={() => setShowPass(!showPass)}
                   >
                     {!showPass ? <Eye /> : <EyeClosed />}
@@ -111,9 +149,40 @@ const Login = () => {
                 <div>
                   <button
                     type="submit"
-                    className="w-full cursor-pointer bg-amber-500 text-white py-2 px-4 rounded-md hover:bg-amber-600 transition"
+                    className={`w-full cursor-pointer py-2 px-4 rounded-md transition ${
+                      isLoading
+                        ? "bg-amber-400 text-gray-200 cursor-not-allowed"
+                        : "bg-amber-500 text-white hover:bg-amber-600"
+                    }`}
+                    disabled={isLoading}
                   >
-                    Login
+                    {isLoading ? (
+                      <div className="flex justify-center items-center gap-2">
+                        <svg
+                          className="animate-spin h-5 w-5 text-gray-200"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
+                          ></path>
+                        </svg>
+                        Logging in...
+                      </div>
+                    ) : (
+                      "Sign In"
+                    )}
                   </button>
                 </div>
               </form>

@@ -10,10 +10,12 @@ import Client from "./pages/dash/Clients";
 import Index from "./pages/dash/Index";
 import { OrdersPage } from "./pages/dash/Orders";
 import MenuPage from "./pages/dash/Menu";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
     <>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route element={<Login />} path="/login" />
