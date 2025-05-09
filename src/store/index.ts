@@ -5,14 +5,14 @@ import { persistStore } from "redux-persist";
 import persistReducer from "redux-persist/es/persistReducer";
 
 const rootReducer = combineReducers({
-    auth: authReducer
-})
+  auth: authReducer,
+});
 
 const persistConfig = {
-    key: 'root',
-    storage,
-    whitelist: ['auth']
-}
+  key: "root",
+  storage,
+  whitelist: ["auth"],
+};
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

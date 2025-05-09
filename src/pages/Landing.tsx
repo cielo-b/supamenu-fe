@@ -18,13 +18,16 @@ const Landing = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const user = localStorage.getItem("user");
+  const userData = user ? JSON.parse(user) : null;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header/Navigation */}
       <header className="flex justify-between items-center p-6 bg-black shadow-sm relative">
         <Link to={"/"} className="text-3xl text-white font-bold">
           Supa<span className="text-amber-500">Menu</span>
-        </Link >
+        </Link>
 
         <div className="flex items-center gap-6">
           {/* Hamburger Menu for Mobile */}
@@ -63,7 +66,11 @@ const Landing = () => {
               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                 <User className="w-4 h-4 text-gray-600" />
               </div>
-              <span className="font-medium text-white">D Regis</span>
+              {userData && (
+                <span className="font-medium text-white">
+                  {userData.firstName}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -100,14 +107,10 @@ const Landing = () => {
 
         <div className="flex flex-col sm:flex-row justify-center gap-4 w-[90%] sm:w-[50%]">
           <button className="text-black bg-amber-500 cursor-pointer w-[100%] px-6 py-3 sm:w-[50%] rounded-lg font-medium hover:bg-black hover:text-amber-500 hover:border-amber-500 border-2 border-amber-500 transition">
-            <Link to={"/register"}>
-            Register your Restaurant
-            </Link>
+            <Link to={"/register"}>Register your Restaurant</Link>
           </button>
           <button className="border-2 border-amber-500 cursor-pointer w-[100%] sm:w-[50%] hover:text-black text-amber-500 px-6 py-3 rounded-lg font-medium hover:bg-amber-500 hover:bg-opacity-10 transition">
-            <Link to={"/login"}>
-            Restaurant already registered? Signin
-            </Link>
+            <Link to={"/login"}>Restaurant already registered? Signin</Link>
           </button>
         </div>
       </section>

@@ -1,3 +1,5 @@
+import { EBusinessCategory, EUser } from "../enums/enums";
+
 export interface LandingCardProps {
   icon: any;
   title: string;
@@ -22,12 +24,6 @@ export interface ClientData {
   businessType: string;
 }
 
-export enum EUser {
-  ROLE_ADMIN,
-  ROLE_CLIENT,
-  ROLE_CUSTOMER,
-}
-
 export interface User {
   id?: string;
   first_name: string;
@@ -44,6 +40,34 @@ export interface AuthState {
   error: string | null;
 }
 
+export interface ClientInitialState {
+  client: Client | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface Client {
+  clientName: string | null;
+  category: EBusinessCategory | null;
+  representative: string | null;
+  creationDate: Date | null;
+  address: string | null;
+  email: string | null;
+  phone: string | null;
+  bankAccount: string | null;
+}
+
+export interface CreateClientDTO {
+  clientName: string;
+  category: EBusinessCategory;
+  representative: string;
+  creationDate: Date;
+  address: string;
+  email: string;
+  phone: string;
+  bankAccount: string;
+}
+
 export interface LoginDTO {
   email: string;
   password: string;
@@ -57,7 +81,6 @@ export interface RegisterDTO {
   phoneNumber: string;
 }
 
-
 export interface ApiErrorResponse {
   success: boolean;
   error?: string;
@@ -69,4 +92,9 @@ export interface ApiErrorResponse {
 export interface ValidationErrorResponse extends ApiErrorResponse {
   error: "VALIDATION_ERROR";
   details: Record<string, string>;
+}
+
+export interface RouteGuardProps {
+  children: React.ReactNode;
+  roles?: string[];
 }
